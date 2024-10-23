@@ -83,6 +83,7 @@ export default function SearchDropdown() {
        setSelection(null);
        return;
     }
+
     switch(value.type){
         case 'artist':
             const artistData = musicData.find(artist => artist.name === value.name);
@@ -93,7 +94,7 @@ export default function SearchDropdown() {
             break;
         case 'album':
             const artistWithAlbum = musicData.find(artist => artist.name === value.artistName);
-            const albumData = artistWithAlbum.albums.find(album =>album.title ===value.albumName );
+            const albumData = artistWithAlbum.albums.find(album =>album.title ===value.name );
             setSelection({
                 type :'album',
                 data: albumData,
@@ -146,20 +147,21 @@ export default function SearchDropdown() {
                 </div>
             )}
 
-            {selection.tyep === 'album'&& (
-                <div>
-                    <h4>Album:{selection.data.title}</h4>
-                    <h5>artist:{selection.artistName}</h5>
-                    <p>{selection.data.description}</p>
-                    <ul>
-                        {selection.data.songs.map((song,idx)=> (
-                             <li key={idx}>
-                             {song.title} - {song.length}
-                         </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+                {selection.type === 'album' && (
+                    
+                    <div>
+                        <h4>album: {selection.data.title}</h4>
+                        <h5>artist: {selection.artistName}</h5>
+                        <p>{selection.data.description}</p>
+                        <ul>
+                            {selection.data.songs.map((song, idx) => (
+                                <li key={idx}>
+                                    {song.title} - {song.length}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             {selection.type === 'song' && (
                 <div>
                 <h4>Song: {selection.data.title}</h4>
