@@ -1,5 +1,5 @@
 import * as React from 'react';
-import TextField from '@mui/material/TextField';
+import { Box, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 
 
@@ -8,6 +8,13 @@ export default function SearchDropdown() {
    const [musicData, setMusicData] = React.useState([]);
    const [options, setOptions] = React.useState([]);
    const [selection, setSelection] = React.useState(null);
+   const[searchType,setSearchType] = React.useState('name');
+
+   const searchTypes = [
+        { value: 'name', label: 'Artist' },
+        { value: 'album', label: 'Album' },
+        { value: 'song', label: 'Song' }
+   ]
 
    React.useEffect(() =>{
     // fetch the local json data
@@ -27,6 +34,11 @@ export default function SearchDropdown() {
         })
    }, []);
 
+   const handleSearchTypeChange = (event) =>{
+        setSearchType(event.target.value);
+        setOptions([]);
+        setSelection(null);
+   }
 
 
 // function to handle the input changes
@@ -36,7 +48,6 @@ export default function SearchDropdown() {
         return;
     }
     const searchTxt = value.toLowerCase();
-
     let searchResults = [];
     
     musicData.forEach(artist =>{
@@ -117,6 +128,22 @@ export default function SearchDropdown() {
 
    return(
     <div className='searchDropdown'>
+    <Box>
+        <FormControl>
+        <InputLabel id="search-type-label">Search Type</InputLabel>
+            <Select
+                labelId = "search-type-label"
+                value = {searchType}
+                label ="search type"
+                onChange ={handleSearchTypeChange}>
+                 {searchTypes.map((type) => (
+                    <MenuItem key = {type.value} value = {type.value}>
+                        {type.label}
+                    </MenuItem>
+                ))}
+            </Select>
+        </FormControl>
+    </Box>
     <Autocomplete
       disablePortal
       options={options}
