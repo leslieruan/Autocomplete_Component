@@ -3,7 +3,6 @@ import { Box, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/
 import Autocomplete from '@mui/material/Autocomplete';
 
 
-
 export default function SearchDropdown() {
    const [musicData, setMusicData] = React.useState([]);
    const [options, setOptions] = React.useState([]);
@@ -51,38 +50,48 @@ export default function SearchDropdown() {
     let searchResults = [];
     
     musicData.forEach(artist =>{
-         // search artist name
-        if(artist.name.toLowerCase().includes(searchTxt)){
-            searchResults.push({
-                type:'artist',
-                name:artist.name,
-                display: `Artist: ${artist.name}`
-            });
+        if(searchType === 'name'){
+            if(artist.name.toLowerCase().includes(searchTxt)){
+                searchResults.push({
+                    type:'artist',
+                    name:artist.name,
+                    display: `${artist.name}`
+                });
+            }
         }
+         // search artist name
+        
 
     // search albums
-        artist.albums.forEach(album =>{
-            if(album.title.toLowerCase().includes(searchTxt)){
-            searchResults.push({
-                type:'album',
-                artistName: artist.name,
-                name:album.title,
-                display: `Album: ${album.title} - ${artist.name}`
-            });
-            }
-        // search song
-            album.songs.forEach(song =>{
-                if(song.title.toLowerCase().includes(searchTxt)){
-                    searchResults.push({
-                        type: 'song',
-                        name: song.title,
-                        artistName: artist.name,
-                        albumName: album.title,
-                        display: `Song: ${song.title} - ${artist.name}`
+        if(searchType === 'album' || searchType === 'song'){
+            artist.albums.forEach(album =>{
+                if(searchType === 'album' && album.title.toLowerCase().includes(searchTxt)){
+                searchResults.push({
+                    type:'album',
+                    artistName: artist.name,
+                    name:album.title,
+                    display: `${album.title} - ${artist.name}`
+                });
+                }
+                if (searchType === 'song'){
+                    album.songs.forEach(song =>{
+                        if(song.title.toLowerCase().includes(searchTxt)){
+                            searchResults.push({
+                                type: 'song',
+                                name: song.title,
+                                artistName: artist.name,
+                                albumName: album.title,
+                                display: `${song.title} - ${artist.name}`
+                            });
+                        }          
                     });
-                }          
+                }
+            // search song
+               
             });
-        });
+
+        }
+      
  });
  searchResults = searchResults.slice(0, 10);
  setOptions(searchResults);
