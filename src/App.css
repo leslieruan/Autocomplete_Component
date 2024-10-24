@@ -12,10 +12,24 @@
 .search-container {
   background-color: antiquewhite;
   padding: 20px;
-  height: 100px;
+  height: 200px;
   justify-content: center;
   
 }
+@media screen and (max-width: 576px) {
+  .search-container {
+    height: 200px;
+  }
+}
+@media screen and (min-width: 577px) and (max-width: 1023px) {
+  .search-container {
+    height: 150px;
+  }
+}
+@media screen and (min-width: 1024px) {
+  .search-container {
+    height: 100px;
+  }}
 
 .info-container {
   background-color: grey;

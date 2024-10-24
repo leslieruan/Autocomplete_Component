@@ -17,12 +17,6 @@ export default function SearchDropdown() {
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
 
-    const searchTypes = [
-        { value: 'name', label: 'Artist' },
-        { value: 'album', label: 'Album' },
-        { value: 'song', label: 'Song' }
-    ]
-
     React.useEffect(() => {
         // fetch the local json data
         fetch('./data.json')
