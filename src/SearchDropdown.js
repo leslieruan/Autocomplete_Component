@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { WorkOffRounded } from '@mui/icons-material';
+import { Construction, WorkOffRounded } from '@mui/icons-material';
 
 
 export default function SearchDropdown() {
@@ -51,20 +51,28 @@ export default function SearchDropdown() {
             setOptions([]);
             return;
         }
+        
         const searchTxt = value.toLowerCase();
-        const searcWords = searchTxt.split(' ').filter(word => word.length > 0);
+        // only filter the empty strings 
+        const searchWords = searchTxt.split(' ').filter(word => word !== ' ');
+        console.log('value' ,value);
+        console.log('search text',searchTxt );
+        console.log('serchword', searchWords)
+
 
         let searchResults = [];
        
         musicData.forEach(artist => {
             if (searchType === 'name'){
+            console.log('artist:', artist.name);
             const artistWords = artist.name.toLowerCase().split(' ');
-            const basiMacth = artist.name.toLowerCase().includes(searcWords);
-            const wordMatch = searcWords.every(w => artist.name.toLowerCase().includes(w));
-            const unorderedMatch = searcWords.every(searchw => 
+            console.log('artistWords:', artistWords);
+            const basicMacth = artist.name.toLowerCase().includes(searchWords);
+            const wordMatch = searchWords.length > 0 && searchWords.every(w => artist.name.toLowerCase().includes(w));
+            const unorderedMatch = searchWords.length > 0 && searchWords.every(searchw => 
                 artistWords.some(artistw => artistw.includes(searchw)))
             // search artist 
-            if (basiMacth || wordMatch || unorderedMatch) {
+            if (basicMacth || wordMatch || unorderedMatch) {
                
                     searchResults.push({
                         type: 'artist',
@@ -78,12 +86,12 @@ export default function SearchDropdown() {
             if (searchType === 'album' || searchType === 'song'){
                 artist.albums.forEach(album => {
                     const albumtWords = album.title.toLowerCase().split(' ');
-                    const albumBasiMacth = album.title.toLowerCase().includes(searcWords);
-                    const albumWordMatch = searcWords.every(w =>  album.title.toLowerCase().includes(w));
-                    const unorderedAlbumMatch = searcWords.every(searchw => 
+                    const albumbasicMacth = album.title.toLowerCase().includes(searchWords);
+                    const albumWordMatch = searchWords.length > 0 &&searchWords.every(w =>  album.title.toLowerCase().includes(w));
+                    const unorderedAlbumMatch = searchWords.every(searchw => 
                         albumtWords.some(albumw => albumw.includes(searchw))  )
 
-                    if (albumBasiMacth || albumWordMatch ||unorderedAlbumMatch) {
+                    if (albumbasicMacth || albumWordMatch ||unorderedAlbumMatch) {
                         searchResults.push({
                             type: 'album',
                             artistName: artist.name,
@@ -95,11 +103,11 @@ export default function SearchDropdown() {
                     if(searchType === 'song'){
                         album.songs.forEach(song => {
                             const songWords = song.title.toLowerCase().split(' ');
-                            const songBasiMacth = song.title.toLowerCase().includes(searcWords);
-                            const songWordMatch = searcWords.every(w =>  album.title.toLowerCase().includes(w));
-                            const unorderedSongMatch = searcWords.every(searchw => 
+                            const songbasicMacth = song.title.toLowerCase().includes(searchWords);
+                            const songWordMatch = searchWords.every(w =>  album.title.toLowerCase().includes(w));
+                            const unorderedSongMatch = searchWords.every(searchw => 
                                 songWords.some(songw => songw.includes(searchw))  )
-                            if (songBasiMacth || songWordMatch ||unorderedSongMatch) {
+                            if (songbasicMacth || songWordMatch ||unorderedSongMatch) {
                                 searchResults.push({
                                     type: 'song',
                                     name: song.title,
@@ -179,10 +187,14 @@ export default function SearchDropdown() {
                 disablePortal
                 options={options}
                 sx={{ width: 300 }}
-                onInputChange={handleInput}
+                freeSolo
+                onInputChange={(event, newValue) => {
+                    handleInput(event, newValue);
+                }}
                 onChange={handleSelection}
                 inputValue={inputValue}
                 getOptionLabel={(option) => option.display || ''}
+                filterOptions={(options) => options} 
                 renderInput={(params) => <TextField {...params} label="Search" />}
             />
             {selection && (
