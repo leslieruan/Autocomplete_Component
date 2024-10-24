@@ -58,25 +58,32 @@ export default function SearchDropdown() {
        
         musicData.forEach(artist => {
             if (searchType === 'name'){
+            const artistWords = artist.name.toLowerCase().split(' ');
             const basiMacth = artist.name.toLowerCase().includes(searcWords);
             const wordMatch = searcWords.every(w => artist.name.toLowerCase().includes(w));
+            const unorderedMatch = searcWords.every(searchw => 
+                artistWords.some(artistw => artistw.includes(searchw)))
             // search artist 
-            if (basiMacth || wordMatch) {
-                if (artist.name.toLowerCase().includes(searchTxt)) {
+            if (basiMacth || wordMatch || unorderedMatch) {
+               
                     searchResults.push({
                         type: 'artist',
                         name: artist.name,
                         display: `${artist.name}`
                     });
-                }
+                
             }
         }
             // search albums
             if (searchType === 'album' || searchType === 'song'){
                 artist.albums.forEach(album => {
+                    const albumtWords = album.title.toLowerCase().split(' ');
                     const albumBasiMacth = album.title.toLowerCase().includes(searcWords);
                     const albumWordMatch = searcWords.every(w =>  album.title.toLowerCase().includes(w));
-                    if (albumBasiMacth || albumWordMatch) {
+                    const unorderedAlbumMatch = searcWords.every(searchw => 
+                        albumtWords.some(albumw => albumw.includes(searchw))  )
+
+                    if (albumBasiMacth || albumWordMatch ||unorderedAlbumMatch) {
                         searchResults.push({
                             type: 'album',
                             artistName: artist.name,
@@ -86,11 +93,13 @@ export default function SearchDropdown() {
                     }
                     // search song
                     if(searchType === 'song'){
-
                         album.songs.forEach(song => {
+                            const songWords = song.title.toLowerCase().split(' ');
                             const songBasiMacth = song.title.toLowerCase().includes(searcWords);
                             const songWordMatch = searcWords.every(w =>  album.title.toLowerCase().includes(w));
-                            if (songBasiMacth || songWordMatch) {
+                            const unorderedSongMatch = searcWords.every(searchw => 
+                                songWords.some(songw => songw.includes(searchw))  )
+                            if (songBasiMacth || songWordMatch ||unorderedSongMatch) {
                                 searchResults.push({
                                     type: 'song',
                                     name: song.title,
