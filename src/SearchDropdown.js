@@ -1,8 +1,12 @@
 import * as React from 'react';
-import { Box, TextField, Select, MenuItem, FormControl, InputLabel, Card, CardContent, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import Autocomplete from '@mui/material/Autocomplete';
+import { Box } from '@mui/material';
 import { Grid } from '@mui/system';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+import SearchTypeSelect from './SearchTypeSelect';
+import SearchInput from './SearchInput';
+import ArtistInfo from './ArtistInfo';
+import AlbumInfo from './AlbumInfo';
+import SongInfo from './SongInfo';
 
 
 
@@ -182,118 +186,35 @@ export default function SearchDropdown() {
     };
 
     return (
-        <div className='searchDropdown'>
-            <Grid className="search-container" container>
-                <Box item>
-                    <FormControl>
-                        <InputLabel id="search-type-label">Type</InputLabel>
-                        <Select
-                            labelId="search-type-label"
-                            value={searchType}
-                            label="search type"
-                            onChange={handleSearchTypeChange}>
-                            {searchTypes.map((type) => (
-                                <MenuItem key={type.value} value={type.value}>
-                                    {type.label}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Box>
-                <Grid item>
-                    <Autocomplete
-                        key={searchType}
-                        disablePortal
-                        options={options}
-                        sx={{ width: 300 }}
-                        // freeSolo={true}
-                        onInputChange={(event, newValue) => {
-                            handleInput(event, newValue);
-                        }}
-                        onChange={handleSelection}
-                        inputValue={inputValue}
-                        getOptionLabel={(option) => option.display || ''}
-                        filterOptions={(options) => options}
-                        renderInput={(params) => <TextField {...params} label="Search" />}
-                    />
-                </Grid>
-
+        <div className="searchDropdown">
+          <Grid className="search-container" container>
+            <Box item>
+              <SearchTypeSelect searchType={searchType} handleSearchTypeChange={handleSearchTypeChange} />
+            </Box>
+            <Grid item>
+              <SearchInput
+                searchType={searchType}
+                options={options}
+                inputValue={inputValue}
+                handleInput={handleInput}
+                handleSelection={handleSelection}
+              />
             </Grid>
-            <Grid className="info-container" container spacing={2}>
-                {selection && (
-                    <div className='music-info'>
-                        {selection.type === 'artist' && (
-                            <Grid item xs={12}>
-                                <Card className="artist-card">
-                                    <CardContent>
-                                        <Typography variant="h5">{selection.data.name}</Typography>
-                                    </CardContent>
-                                </Card>
-                                {selection.data.albums.map((album, index) => (
-                                    <Accordion key={index} className="album-accordion">
-                                        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls={`album-content-${index}`} id={`album-header-${index}`}>
-                                            <Typography variant="h6">{album.title}</Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                            <Typography>{album.description}</Typography>
-                                            <ul>
-                                                {album.songs.map((song, idx) => (
-                                                    <li key={idx}>
-                                                        <Typography variant="body2">
-                                                            {song.title} - {song.length}
-                                                        </Typography>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </AccordionDetails>
-                                    </Accordion>
-                                ))}
-
-                            </Grid>
-                        )}
-                        {selection.type === 'album' && (
-                           <Grid item xs={12}>
-                           <Card className="album-card">
-                             <CardContent>
-                               <Typography variant="h5">{selection.data.title}</Typography>
-                               <Typography variant="h6">Artist: {selection.artistName}</Typography>
-                               <Typography >{selection.data.description}</Typography>
-                             </CardContent>
-                           </Card>
-                           <Accordion className="songs-accordion">
-                             <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="songs-content" id="songs-header">
-                               <Typography variant="h6">Songs</Typography>
-                             </AccordionSummary>
-                             <AccordionDetails>
-                               <ul>
-                                 {selection.data.songs.map((song, idx) => (
-                                   <li key={idx}>
-                                     <Typography variant="body2">
-                                       {song.title} - {song.length}
-                                     </Typography>
-                                   </li>
-                                 ))}
-                               </ul>
-                             </AccordionDetails>
-                           </Accordion>
-                         </Grid>
-                        )}
-                        {selection.type === 'song' && (
-                            <Grid item xs={12}>
-                            <Card className="song-card">
-                              <CardContent>
-                                <Typography variant="h5"> {selection.data.title}</Typography>
-                                <Typography variant="h6">Album: {selection.albumName}</Typography>
-                                <Typography variant="p">Artist: {selection.artistName}</Typography>
-                                <Typography>Length: {selection.data.length}</Typography>
-                              </CardContent>
-                            </Card>
-                          </Grid>
-                        )}
-                    </div>
+          </Grid>
+    
+          <Grid className="info-container" container spacing={2}>
+            {selection && (
+              <div className="music-info">
+                {selection.type === 'artist' && <ArtistInfo artist={selection.data} />}
+                {selection.type === 'album' && (
+                  <AlbumInfo album={selection.data} artistName={selection.artistName} />
                 )}
-            </Grid>
-
+                {selection.type === 'song' && (
+                  <SongInfo song={selection.data} albumName={selection.albumName} artistName={selection.artistName} />
+                )}
+              </div>
+            )}
+          </Grid>
         </div>
-    );
-}
+      );
+    }
