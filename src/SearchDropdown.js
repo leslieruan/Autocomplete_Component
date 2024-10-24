@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Construction, WorkOffRounded } from '@mui/icons-material';
+
 
 
 export default function SearchDropdown() {
@@ -55,29 +55,24 @@ export default function SearchDropdown() {
         const searchTxt = value.toLowerCase();
         // only filter the empty strings 
         const searchWords = searchTxt.split(' ').filter(word => word !== ' ');
-        console.log('value' ,value);
-        console.log('search text',searchTxt );
-        console.log('serchword', searchWords)
-
-
         let searchResults = [];
-       
+      
         musicData.forEach(artist => {
             if (searchType === 'name'){
-            console.log('artist:', artist.name);
             const artistWords = artist.name.toLowerCase().split(' ');
-            console.log('artistWords:', artistWords);
             const basicMacth = artist.name.toLowerCase().includes(searchWords);
             const wordMatch = searchWords.length > 0 && searchWords.every(w => artist.name.toLowerCase().includes(w));
             const unorderedMatch = searchWords.length > 0 && searchWords.every(searchw => 
                 artistWords.some(artistw => artistw.includes(searchw)))
             // search artist 
             if (basicMacth || wordMatch || unorderedMatch) {
-               
                     searchResults.push({
                         type: 'artist',
                         name: artist.name,
-                        display: `${artist.name}`
+                        display: `${artist.name}`,
+                        basicMacth,
+                        wordMatch,
+                        unorderedMatch
                     });
                 
             }
@@ -96,7 +91,10 @@ export default function SearchDropdown() {
                             type: 'album',
                             artistName: artist.name,
                             name: album.title,
-                            display: `${album.title} - ${artist.name}`
+                            display: `${album.title} - ${artist.name}`,
+                            basicMatch: albumbasicMacth,
+                            wordMatch: albumWordMatch,
+                            unorderedMatch: unorderedAlbumMatch
                         });
                     }
                     // search song
@@ -113,7 +111,10 @@ export default function SearchDropdown() {
                                     name: song.title,
                                     artistName: artist.name,
                                     albumName: album.title,
-                                    display: `${song.title} - ${artist.name}`
+                                    display: `${song.title} - ${artist.name}`,
+                                    basicMatch: songbasicMacth,
+                                    wordMatch: songWordMatch,
+                                    unorderedMatch: unorderedSongMatch
                                 });
                             }
                         });
@@ -122,8 +123,22 @@ export default function SearchDropdown() {
                 );
             }
         });
+        
+         // sort the search result  basic > word >unorder
+        searchResults.sort((a, b) =>{
+            if(a.basicMacth !== b.basicMacth){
+                return a.basicMatch ? -1 : 1;
+            }
+            if (a.wordMatch !== b.wordMatch) {
+                return a.wordMatch ? -1 : 1;
+            }
+            if (a.unorderedMatch !== b.unorderedMatch) {
+                return a.unorderedMatch ? -1 : 1;
+            }
+            return 0;
+        })      
         searchResults = searchResults.slice(0, 10);
-        setOptions(searchResults);
+        setOptions(searchResults);       
     };
 
     // function to find the select data
@@ -187,7 +202,7 @@ export default function SearchDropdown() {
                 disablePortal
                 options={options}
                 sx={{ width: 300 }}
-                freeSolo
+                freeSolo ={true}
                 onInputChange={(event, newValue) => {
                     handleInput(event, newValue);
                 }}
