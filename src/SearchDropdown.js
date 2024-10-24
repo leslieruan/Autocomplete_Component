@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, TextField, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
+import { WorkOffRounded } from '@mui/icons-material';
 
 
 export default function SearchDropdown() {
@@ -33,7 +34,7 @@ export default function SearchDropdown() {
                 console.error("Error fetching the data:", error);
             })
     }, []);
-
+    
 
     const handleSearchTypeChange = async (event) => {
         setSearchType(event.target.value);
@@ -46,16 +47,21 @@ export default function SearchDropdown() {
     // function to handle the input changes
     const handleInput = (e, value) => {
         setInputValue(value);
-        console.log(value);
         if (!value) {
             setOptions([]);
             return;
         }
         const searchTxt = value.toLowerCase();
+        const searcWords = searchTxt.split(' ').filter(word => word.length > 0);
+
         let searchResults = [];
-        // search artist 
+       
         musicData.forEach(artist => {
-            if (searchType === 'name') {
+            if (searchType === 'name'){
+            const basiMacth = artist.name.toLowerCase().includes(searcWords);
+            const wordMatch = searcWords.every(w => artist.name.toLowerCase().includes(w));
+            // search artist 
+            if (basiMacth || wordMatch) {
                 if (artist.name.toLowerCase().includes(searchTxt)) {
                     searchResults.push({
                         type: 'artist',
@@ -64,10 +70,13 @@ export default function SearchDropdown() {
                     });
                 }
             }
+        }
             // search albums
-            if (searchType === 'album' || searchType === 'song') {
+            if (searchType === 'album' || searchType === 'song'){
                 artist.albums.forEach(album => {
-                    if (searchType === 'album' && album.title.toLowerCase().includes(searchTxt)) {
+                    const albumBasiMacth = album.title.toLowerCase().includes(searcWords);
+                    const albumWordMatch = searcWords.every(w =>  album.title.toLowerCase().includes(w));
+                    if (albumBasiMacth || albumWordMatch) {
                         searchResults.push({
                             type: 'album',
                             artistName: artist.name,
@@ -75,9 +84,13 @@ export default function SearchDropdown() {
                             display: `${album.title} - ${artist.name}`
                         });
                     }
-                    if (searchType === 'song') {
+                    // search song
+                    if(searchType === 'song'){
+
                         album.songs.forEach(song => {
-                            if (song.title.toLowerCase().includes(searchTxt)) {
+                            const songBasiMacth = song.title.toLowerCase().includes(searcWords);
+                            const songWordMatch = searcWords.every(w =>  album.title.toLowerCase().includes(w));
+                            if (songBasiMacth || songWordMatch) {
                                 searchResults.push({
                                     type: 'song',
                                     name: song.title,
@@ -88,10 +101,9 @@ export default function SearchDropdown() {
                             }
                         });
                     }
-                });
-
+                    }
+                );
             }
-
         });
         searchResults = searchResults.slice(0, 10);
         setOptions(searchResults);
@@ -154,6 +166,7 @@ export default function SearchDropdown() {
                 </FormControl>
             </Box>
             <Autocomplete
+                key={searchType} 
                 disablePortal
                 options={options}
                 sx={{ width: 300 }}
