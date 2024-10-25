@@ -7,9 +7,10 @@ function cleanData(data) {
     return data.map(item => {
         const cleanItem = {};
         for (const [key, value] of Object.entries(item)) {
-            if (typeof value === 'string') {
-                // clean string       
-                cleanItem[key] = value.replace(/[\n\t]/g, ' ').trim(); 
+            if (key === '_id' && value) {
+                cleanItem[key] = value; 
+            } else if (typeof value === 'string') {
+                cleanItem[key] = value.replace(/[\n\t]/g, ' ').trim();
             } else if (Array.isArray(value)) {
                 cleanItem[key] = cleanData(value);
             } else if (typeof value === 'object' && value !== null) {
@@ -35,8 +36,7 @@ async function importData() {
         );
 
         const safeData = preprocessJson(rawData);
-        
-        
+
         let jsonData = JSON.parse(safeData);
 
         const cleanedData = cleanData(jsonData);
