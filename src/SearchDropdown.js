@@ -19,7 +19,7 @@ export default function SearchDropdown() {
 
     React.useEffect(() => {
         // fetch the local json data
-        fetch('./data.json')
+        fetch('http://localhost:5000/api/artists')
             .then((response) => {
                 if (!response.ok) {
                     throw new console.error('response was not ok');
