@@ -16,7 +16,7 @@ async function connectToDatabase() {
     try {
         await client.connect();
         console.log('Successfully connected to MongoDB Atlas');
-        const db = client.db('musicDB');
+        const db = client.db('MusicDB');
         return db;
     } catch (error) {
         console.error('Connection to MongoDB Atlas failed!', error);
