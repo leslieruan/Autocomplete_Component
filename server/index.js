@@ -17,7 +17,14 @@ async function run() {
         await client.connect();
         console.log("Connected successfully to MongoDB Atlas!");
         await client.db("admin").command({ ping: 1 });
+        const database = client.db("musicDB");
+        const collection = database.collection("artists"); 
+
+        const result = await collection.insertMany(cleanedData.flat());
+        console.log(`${result.insertedCount} documents were inserted`);
+    
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        
 
     } finally {
         await client.close();
