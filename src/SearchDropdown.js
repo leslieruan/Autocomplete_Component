@@ -56,75 +56,94 @@ export default function SearchDropdown() {
         // only filter the empty strings 
         const searchWords = searchTxt.split(' ').filter(word => word !== ' ');
         let searchResults = [];
+        // Helper function to match artist
+        const matchArtist = (artist, searchWords, searchTxt) => {
+            const artistWords = artist.name.toLowerCase().split(' ');
+            const basicMatch = artist.name.toLowerCase().includes(searchTxt);
+            const wordMatch = searchWords.every(w => artist.name.toLowerCase().includes(w));
+            const unorderedMatch = searchWords.every(searchWord =>
+                artistWords.some(artistWord => artistWord.includes(searchWord))
+            );
+
+            if (basicMatch || wordMatch || unorderedMatch) {
+                return {
+                    type: 'artist',
+                    name: artist.name,
+                    display: artist.name,
+                    basicMatch,
+                    wordMatch,
+                    unorderedMatch
+                };
+            }
+            return null;
+        };
+
+        // Helper function to match song
+        const matchSong = (song, artistName, albumTitle, searchWords, searchTxt) => {
+            const songWords = song.title.toLowerCase().split(' ');
+            const songbasicMatch = song.title.toLowerCase().includes(searchTxt);
+            const songWordMatch = searchWords.every(w => song.title.toLowerCase().includes(w));
+            const unorderedSongMatch = searchWords.every(searchWord =>
+                songWords.some(songWord => songWord.includes(searchWord))
+            );
+
+            if (songbasicMatch || songWordMatch || unorderedSongMatch) {
+                return {
+                    type: 'song',
+                    name: song.title,
+                    artistName,
+                    albumName: albumTitle,
+                    display: `${song.title} - ${artistName}`,
+                    basicMatch: songbasicMatch,
+                    wordMatch: songWordMatch,
+                    unorderedMatch: unorderedSongMatch
+                };
+            }
+            return null;
+        };
+        // Helper function to match album
+        const matchAlbum = (album, artistName, searchWords, searchTxt) => {
+            const albumWords = album.title.toLowerCase().split(' ');
+            const albumbasicMatch = album.title.toLowerCase().includes(searchTxt);
+            const albumWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
+            const unorderedAlbumMatch = searchWords.every(searchWord =>
+                albumWords.some(albumWord => albumWord.includes(searchWord))
+            );
+
+            if (albumbasicMatch || albumWordMatch || unorderedAlbumMatch) {
+                return {
+                    type: 'album',
+                    artistName,
+                    name: album.title,
+                    display: `${album.title} - ${artistName}`,
+                    basicMatch: albumbasicMatch,
+                    wordMatch: albumWordMatch,
+                    unorderedMatch: unorderedAlbumMatch
+                };
+            }
+            return null;
+        };
 
         musicData.forEach(artist => {
             if (searchType === 'name') {
-                const artistWords = artist.name.toLowerCase().split(' ');
-                const basicMacth = artist.name.toLowerCase().includes(searchWords);
-                const wordMatch = searchWords.length > 0 && searchWords.every(w => artist.name.toLowerCase().includes(w));
-                const unorderedMatch = searchWords.length > 0 && searchWords.every(searchw =>
-                    artistWords.some(artistw => artistw.includes(searchw)))
-                // search artist 
-                if (basicMacth || wordMatch || unorderedMatch) {
-                    searchResults.push({
-                        type: 'artist',
-                        name: artist.name,
-                        display: `${artist.name}`,
-                        basicMacth,
-                        wordMatch,
-                        unorderedMatch
-                    });
-
-                }
-            }
-            // search albums
-            if (searchType === 'album') {
+                const artistMatch = matchArtist(artist, searchWords, searchTxt);
+                if (artistMatch) searchResults.push(artistMatch);
+            } else if (searchType === 'album') {
                 artist.albums.forEach(album => {
-                    const albumtWords = album.title.toLowerCase().split(' ');
-                    const albumbasicMacth = album.title.toLowerCase().includes(searchWords);
-                    const albumWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
-                    const unorderedAlbumMatch = searchWords.every(searchw =>
-                        albumtWords.some(albumw => albumw.includes(searchw)))
-
-                    if (albumbasicMacth || albumWordMatch || unorderedAlbumMatch) {
-                        searchResults.push({
-                            type: 'album',
-                            artistName: artist.name,
-                            name: album.title,
-                            display: `${album.title} - ${artist.name}`,
-                            basicMatch: albumbasicMacth,
-                            wordMatch: albumWordMatch,
-                            unorderedMatch: unorderedAlbumMatch
-                        });
-                    }
-                }
-                );
-            }
-            // search song
-            if (searchType === 'song') {
+                    const albumMatch = matchAlbum(album, artist.name, searchWords, searchTxt);
+                    if (albumMatch) searchResults.push(albumMatch);
+                });
+            } else if (searchType === 'song') {
                 artist.albums.forEach(album => {
                     album.songs.forEach(song => {
-                        const songWords = song.title.toLowerCase().split(' ');
-                        const songbasicMacth = song.title.toLowerCase().includes(searchWords);
-                        const songWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
-                        const unorderedSongMatch = searchWords.every(searchw =>
-                            songWords.some(songw => songw.includes(searchw)))
-                        if (songbasicMacth || songWordMatch || unorderedSongMatch) {
-                            searchResults.push({
-                                type: 'song',
-                                name: song.title,
-                                artistName: artist.name,
-                                albumName: album.title,
-                                display: `${song.title} - ${artist.name}`,
-                                basicMatch: songbasicMacth,
-                                wordMatch: songWordMatch,
-                                unorderedMatch: unorderedSongMatch
-                            });
-                        }
+                        const songMatch = matchSong(song, artist.name, album.title, searchWords, searchTxt);
+                        if (songMatch) searchResults.push(songMatch);
                     });
                 });
             }
         });
+
+
 
         // sort the search result  basic > word >unorder
         searchResults.sort((a, b) => {
@@ -177,6 +196,8 @@ export default function SearchDropdown() {
                     albumName: value.albumName,
                     artistName: value.artistName
                 });
+                break;
+            default:
                 break;
         }
     };
