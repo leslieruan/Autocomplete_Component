@@ -78,11 +78,11 @@ export default function SearchDropdown() {
                 }
             }
             // search albums
-            if (searchType === 'album' || searchType === 'song') {
+            if (searchType === 'album') {
                 artist.albums.forEach(album => {
                     const albumtWords = album.title.toLowerCase().split(' ');
                     const albumbasicMacth = album.title.toLowerCase().includes(searchWords);
-                    const albumWordMatch = searchWords.length > 0 && searchWords.every(w => album.title.toLowerCase().includes(w));
+                    const albumWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
                     const unorderedAlbumMatch = searchWords.every(searchw =>
                         albumtWords.some(albumw => albumw.includes(searchw)))
 
@@ -97,30 +97,32 @@ export default function SearchDropdown() {
                             unorderedMatch: unorderedAlbumMatch
                         });
                     }
-                    // search song
-                    if (searchType === 'song') {
-                        album.songs.forEach(song => {
-                            const songWords = song.title.toLowerCase().split(' ');
-                            const songbasicMacth = song.title.toLowerCase().includes(searchWords);
-                            const songWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
-                            const unorderedSongMatch = searchWords.every(searchw =>
-                                songWords.some(songw => songw.includes(searchw)))
-                            if (songbasicMacth || songWordMatch || unorderedSongMatch) {
-                                searchResults.push({
-                                    type: 'song',
-                                    name: song.title,
-                                    artistName: artist.name,
-                                    albumName: album.title,
-                                    display: `${song.title} - ${artist.name}`,
-                                    basicMatch: songbasicMacth,
-                                    wordMatch: songWordMatch,
-                                    unorderedMatch: unorderedSongMatch
-                                });
-                            }
-                        });
-                    }
                 }
                 );
+            }
+            // search song
+            if (searchType === 'song') {
+                artist.albums.forEach(album => {
+                    album.songs.forEach(song => {
+                        const songWords = song.title.toLowerCase().split(' ');
+                        const songbasicMacth = song.title.toLowerCase().includes(searchWords);
+                        const songWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
+                        const unorderedSongMatch = searchWords.every(searchw =>
+                            songWords.some(songw => songw.includes(searchw)))
+                        if (songbasicMacth || songWordMatch || unorderedSongMatch) {
+                            searchResults.push({
+                                type: 'song',
+                                name: song.title,
+                                artistName: artist.name,
+                                albumName: album.title,
+                                display: `${song.title} - ${artist.name}`,
+                                basicMatch: songbasicMacth,
+                                wordMatch: songWordMatch,
+                                unorderedMatch: unorderedSongMatch
+                            });
+                        }
+                    });
+                });
             }
         });
 
@@ -181,34 +183,34 @@ export default function SearchDropdown() {
 
     return (
         <div className="searchDropdown">
-          <Grid className="search-container" container>
-            <Box item>
-              <SearchTypeSelect searchType={searchType} handleSearchTypeChange={handleSearchTypeChange} />
-            </Box>
-            <Grid item>
-              <SearchInput
-                searchType={searchType}
-                options={options}
-                inputValue={inputValue}
-                handleInput={handleInput}
-                handleSelection={handleSelection}
-              />
+            <Grid className="search-container" container>
+                <Box item>
+                    <SearchTypeSelect searchType={searchType} handleSearchTypeChange={handleSearchTypeChange} />
+                </Box>
+                <Grid item>
+                    <SearchInput
+                        searchType={searchType}
+                        options={options}
+                        inputValue={inputValue}
+                        handleInput={handleInput}
+                        handleSelection={handleSelection}
+                    />
+                </Grid>
             </Grid>
-          </Grid>
-    
-          <Grid className="info-container" container spacing={2}>
-            {selection && (
-              <div className="music-info">
-                {selection.type === 'artist' && <ArtistInfo artist={selection.data} />}
-                {selection.type === 'album' && (
-                  <AlbumInfo album={selection.data} artistName={selection.artistName} />
+
+            <Grid className="info-container" container spacing={2}>
+                {selection && (
+                    <div className="music-info">
+                        {selection.type === 'artist' && <ArtistInfo artist={selection.data} />}
+                        {selection.type === 'album' && (
+                            <AlbumInfo album={selection.data} artistName={selection.artistName} />
+                        )}
+                        {selection.type === 'song' && (
+                            <SongInfo song={selection.data} albumName={selection.albumName} artistName={selection.artistName} />
+                        )}
+                    </div>
                 )}
-                {selection.type === 'song' && (
-                  <SongInfo song={selection.data} albumName={selection.albumName} artistName={selection.artistName} />
-                )}
-              </div>
-            )}
-          </Grid>
+            </Grid>
         </div>
-      );
-    }
+    );
+}
