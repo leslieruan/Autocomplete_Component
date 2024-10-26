@@ -7,7 +7,7 @@ import SearchInput from './SearchInput';
 import ArtistInfo from './ArtistInfo';
 import AlbumInfo from './AlbumInfo';
 import SongInfo from './SongInfo';
-
+import { loadSearchHistory, saveSearchHistory } from './SearchHistory'
 
 
 export default function SearchDropdown() {
@@ -16,14 +16,12 @@ export default function SearchDropdown() {
     const [selection, setSelection] = React.useState(null);
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
-    const  [searchHistory, setSearchHistory] = React.useState([]);
+    const [searchHistory, setSearchHistory] = React.useState([]);
+   
 
     React.useEffect(() => {
-        // store the search history
-        const history = JSON.parse(localStorage.getItem('searchHistory')) || [];
-        console.log(history);
-        setSearchHistory(history);
-
+        // load search history
+        setSearchHistory(loadSearchHistory());
         // fetch the local json data
         fetch('http://localhost:5000/api/artists')
             .then((response) => {
@@ -41,13 +39,7 @@ export default function SearchDropdown() {
             })
     }, []);
 
-    // save the search history to local 
-    const saveSearchHistory =(searchType, searchQuery) =>{
-        const newEntry = {type :searchType, query:searchQuery};
-        const updatedHistory = [newEntry, ...searchHistory].slice(0,10);
-        setSearchHistory(updatedHistory);
-        localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
-    };
+
 
 
     const handleSearchTypeChange = async (event) => {
@@ -70,18 +62,18 @@ export default function SearchDropdown() {
         // only filter the empty strings 
         const searchWords = searchTxt.split(' ').filter(word => word !== ' ');
         let searchResults = [];
+
+        // helper function to match search history
+        const historyMatches = searchHistory.filter(entry => entry.query.toLowerCase().includes(searchTxt))
+            .map(entry => ({
+                type: entry.type,
+                name: entry.query,
+                display: `${entry.query}(history)`,
+                fromHistory: true
+            }));
+
+        searchResults.push(...historyMatches);  
         // Helper function to match artist
-
-        //Helper function match search history
-        const matchHistory = searchHistory.filter(enter => enter.query.toLowerCase().includes(searchTxt))
-        .map(entry => ({
-            type: entry.type,
-            name: entry.query,
-            display: `${entry.query} (History)`,
-            fromHistory: true
-        }));
-        searchResults.push(...matchHistory);
-
         const matchArtist = (artist, searchWords, searchTxt) => {
             const artistWords = artist.name.toLowerCase().split(' ');
             const basicMatch = artist.name.toLowerCase().includes(searchTxt);
@@ -169,7 +161,7 @@ export default function SearchDropdown() {
         });
 
 
-
+        
         // sort the search result  basic > word >unorder
         searchResults.sort((a, b) => {
             if (a.basicMacth !== b.basicMacth) {
@@ -194,7 +186,8 @@ export default function SearchDropdown() {
             return;
         }
         if(!value.fromHistory){
-            saveSearchHistory(searchType, value.name);
+            const updatedHistory = saveSearchHistory(searchType, value.name);
+            setSearchHistory(updatedHistory);  
         }
 
         switch (value.type) {
