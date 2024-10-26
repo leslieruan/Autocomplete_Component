@@ -16,8 +16,14 @@ export default function SearchDropdown() {
     const [selection, setSelection] = React.useState(null);
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
+    const  [searchHistory, setSearchHistory] = React.useState([]);
 
     React.useEffect(() => {
+        // store the search history
+        const history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        console.log(history);
+        setSearchHistory(history);
+
         // fetch the local json data
         fetch('http://localhost:5000/api/artists')
             .then((response) => {
@@ -34,6 +40,14 @@ export default function SearchDropdown() {
                 console.error("Error fetching the data:", error);
             })
     }, []);
+
+    // save the search history to local 
+    const saveSearchHistory =(searchType, searchQuery) =>{
+        const newEntry = {type :searchType, query:searchQuery};
+        const updatedHistory = [newEntry, ...searchHistory].slice(0,10);
+        setSearchHistory(updatedHistory);
+        localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+    };
 
 
     const handleSearchTypeChange = async (event) => {
@@ -57,6 +71,17 @@ export default function SearchDropdown() {
         const searchWords = searchTxt.split(' ').filter(word => word !== ' ');
         let searchResults = [];
         // Helper function to match artist
+
+        //Helper function match search history
+        const matchHistory = searchHistory.filter(enter => enter.query.toLowerCase().includes(searchTxt))
+        .map(entry => ({
+            type: entry.type,
+            name: entry.query,
+            display: `${entry.query} (History)`,
+            fromHistory: true
+        }));
+        searchResults.push(...matchHistory);
+
         const matchArtist = (artist, searchWords, searchTxt) => {
             const artistWords = artist.name.toLowerCase().split(' ');
             const basicMatch = artist.name.toLowerCase().includes(searchTxt);
@@ -167,6 +192,9 @@ export default function SearchDropdown() {
         if (!value) {
             setSelection(null);
             return;
+        }
+        if(!value.fromHistory){
+            saveSearchHistory(searchType, value.name);
         }
 
         switch (value.type) {
