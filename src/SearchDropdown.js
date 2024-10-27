@@ -17,7 +17,8 @@ export default function SearchDropdown() {
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
     const [searchHistory, setSearchHistory] = React.useState([]);
-   
+
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
     React.useEffect(() => {
         // load search history
@@ -68,11 +69,12 @@ export default function SearchDropdown() {
             .map(entry => ({
                 type: entry.type,
                 name: entry.query,
-                display: `${entry.query}(history)`,
+                display: `${entry.query}`,
                 fromHistory: true
             }));
 
         searchResults.push(...historyMatches);  
+        console.log(searchResults);
         // Helper function to match artist
         const matchArtist = (artist, searchWords, searchTxt) => {
             const artistWords = artist.name.toLowerCase().split(' ');
@@ -159,11 +161,19 @@ export default function SearchDropdown() {
                 });
             }
         });
+        // update the search results
+        
+        searchResults = Array.from(new Map(searchResults.map(item => [`${item.name}-${item.type}`, item])).values());
+
+        console.log("1222222222",searchResults)
 
 
         
         // sort the search result  basic > word >unorder
         searchResults.sort((a, b) => {
+            if(a.fromHistory !== b.fromHistory){
+                return a.fromHistory ? -1 : 1;
+            }
             if (a.basicMacth !== b.basicMacth) {
                 return a.basicMatch ? -1 : 1;
             }
@@ -236,6 +246,7 @@ export default function SearchDropdown() {
                         inputValue={inputValue}
                         handleInput={handleInput}
                         handleSelection={handleSelection}
+                       
                     />
                 </Grid>
             </Grid>

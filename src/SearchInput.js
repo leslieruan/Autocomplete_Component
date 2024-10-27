@@ -6,6 +6,7 @@ export default function SearchInput({ searchType, options, inputValue, handleInp
     <Autocomplete
       key={searchType}
       disablePortal
+      freeSolo
       options={options}
       sx={{ width: 300 }}
       onInputChange={(event, newValue) => handleInput(event, newValue)}
@@ -14,6 +15,24 @@ export default function SearchInput({ searchType, options, inputValue, handleInp
       getOptionLabel={(option) => option.display || ''}
       filterOptions={(options) => options}
       renderInput={(params) => <TextField {...params} label="Search" />}
+      renderOption={(props, option) => {
+       
+        const { key, ...restProps } = props;
+       
+        return (
+          <li
+            key={key}
+            {...restProps}
+
+            style={{
+              color: option.fromHistory ? 'red' : 'black',
+              fontWeight: option.fromHistory ? 'bold' : 'normal'
+            }}
+          >
+            {option.display}
+          </li>
+        );
+      }}
     />
   );
 }

@@ -19,7 +19,7 @@ export const saveSearchHistory = (searchType, searchQuery) => {
     return updatedHistory;
 };
 
-// clear 
+// clear
 export const clearSearchHistory = () => {
     localStorage.removeItem('searchHistory');
 };
