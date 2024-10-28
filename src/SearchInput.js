@@ -12,11 +12,12 @@ export default function SearchInput({ searchType, options, inputValue, handleInp
       onChange={handleSelection}
       inputValue={inputValue}
       getOptionLabel={(option) => {
-        console.log('Option:', option);
         return option.display || '';
       }}
-      // filterOptions={(options) => options}
+      
+
       renderInput={(params) => <TextField {...params} label="Search" />}
+      
 
     />
   );

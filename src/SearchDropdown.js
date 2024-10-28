@@ -16,6 +16,7 @@ export default function SearchDropdown() {
     const [selection, setSelection] = React.useState(null);
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
+    // eslint-disable-next-line no-unused-vars
     const [searchHistory, setSearchHistory] = React.useState([]);
 
     // function to fetch the data and load the searched history data
@@ -23,7 +24,7 @@ export default function SearchDropdown() {
         // load search history
         setSearchHistory(loadSearchHistory(searchType));
         // fetch the local json data
-        fetch('http://localhost:5000/api/artists')
+        fetch(`http://localhost:5001/api/artists`)
             .then((response) => {
                 if (!response.ok) {
                     throw new console.error('response was not ok');
@@ -37,7 +38,7 @@ export default function SearchDropdown() {
             .catch((error) => {
                 console.error("Error fetching the data:", error);
             })
-    }, []);
+    }, [searchType]);
 
 
     // function to hande the Search Type Change
@@ -199,6 +200,9 @@ export default function SearchDropdown() {
                         }
                         break;
                     }
+                    default:
+                        console.warn(`Unexpected type: ${type}`);
+                        return null;
                 }
                 return null;
             }
@@ -220,6 +224,9 @@ export default function SearchDropdown() {
                     const song = findSong(album, name);
                     return song ? { type, data: song, artistName: artist.name, albumName: album.title } : null;
                 }
+                default:
+                    console.warn(`Unexpected type: ${type}`);
+                    return null;
             }
         };
 

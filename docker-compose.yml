@@ -1,0 +1,31 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+    ports:
+      - "3001:3000"  # Maps port 3000 on host to container
+    container_name: frontend
+    depends_on:
+      - backend
+    networks:
+      - default
+    environment:
+      - REACT_APP_RUNNING_IN_DOCKER=true
+
+  backend:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "5001:5001"  # Maps port 5000 on host to container
+    container_name: backend
+    networks:
+      - default
+    environment:
+      - MONGODB_URI=mongodb+srv://leslieruan8:xQiG66x7zSUyGk3T@musicfindercluster.bmb5h.mongodb.net/?retryWrites=true&w=majority&appName=MusicFinderCluster&tls=true
+      - PORT=5001
+
+networks:
+  default:
+    driver: bridge
