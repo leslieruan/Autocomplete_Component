@@ -12,17 +12,16 @@ import { loadSearchHistory, saveSearchHistory } from './SearchHistory'
 
 export default function SearchDropdown() {
     const [musicData, setMusicData] = React.useState([]);
-    const [options, setOptions] = React.useState([]);
+    const [options, setOptions] = React.useState(loadSearchHistory('name'));
     const [selection, setSelection] = React.useState(null);
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
     const [searchHistory, setSearchHistory] = React.useState([]);
 
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
     React.useEffect(() => {
         // load search history
-        setSearchHistory(loadSearchHistory());
+        setSearchHistory(loadSearchHistory(searchType));
         // fetch the local json data
         fetch('http://localhost:5000/api/artists')
             .then((response) => {
@@ -42,10 +41,11 @@ export default function SearchDropdown() {
 
 
 
-
     const handleSearchTypeChange = async (event) => {
-        setSearchType(event.target.value);
-        setOptions([]);
+        const newType = event.target.value;
+        setSearchType(newType);
+        const filteredHistory = loadSearchHistory(newType).filter(entry => entry.type === newType);
+        setOptions(filteredHistory);
         setSelection(null);
         setInputValue('');
     }
@@ -55,7 +55,7 @@ export default function SearchDropdown() {
     const handleInput = (e, value) => {
         setInputValue(value);
         if (!value) {
-            setOptions([]);
+            setOptions(options);
             return;
         }
 
@@ -65,16 +65,17 @@ export default function SearchDropdown() {
         let searchResults = [];
 
         // helper function to match search history
-        const historyMatches = searchHistory.filter(entry => entry.query.toLowerCase().includes(searchTxt))
+        const historyMatches = searchHistory
+            .filter(entry => entry.name.toLowerCase().includes(searchTxt))
             .map(entry => ({
                 type: entry.type,
-                name: entry.query,
-                display: `${entry.query}`,
+                name: entry.name,
+                display: entry.display,
                 fromHistory: true
             }));
 
-        searchResults.push(...historyMatches);  
-        console.log(searchResults);
+        searchResults.push(...historyMatches);
+
         // Helper function to match artist
         const matchArtist = (artist, searchWords, searchTxt) => {
             const artistWords = artist.name.toLowerCase().split(' ');
@@ -161,19 +162,13 @@ export default function SearchDropdown() {
                 });
             }
         });
-        // update the search results
-        
-        searchResults = Array.from(new Map(searchResults.map(item => [`${item.name}-${item.type}`, item])).values());
 
-        console.log("1222222222",searchResults)
+        // update the results
+        let combinedResults = [...searchHistory, ...searchResults];
+        const uniqueResults = Array.from(new Map(combinedResults.map(item => [item.name, item])).values());
 
-
-        
         // sort the search result  basic > word >unorder
-        searchResults.sort((a, b) => {
-            if(a.fromHistory !== b.fromHistory){
-                return a.fromHistory ? -1 : 1;
-            }
+        uniqueResults.sort((a, b) => {
             if (a.basicMacth !== b.basicMacth) {
                 return a.basicMatch ? -1 : 1;
             }
@@ -185,19 +180,21 @@ export default function SearchDropdown() {
             }
             return 0;
         })
-        searchResults = searchResults.slice(0, 10);
-        setOptions(searchResults);
+        searchResults = uniqueResults.slice(0, 10);
+        setOptions(uniqueResults);
     };
 
     // function to find the select data
     const handleSelection = (e, value) => {
         if (!value) {
             setSelection(null);
+            setOptions(loadSearchHistory(searchType));
+            console.log(options);
             return;
         }
-        if(!value.fromHistory){
-            const updatedHistory = saveSearchHistory(searchType, value.name);
-            setSearchHistory(updatedHistory);  
+        if (!value.fromHistory) {
+            const updatedHistory = saveSearchHistory(searchType, value.name, value.name, true);
+            setSearchHistory(updatedHistory);
         }
 
         switch (value.type) {
@@ -246,7 +243,6 @@ export default function SearchDropdown() {
                         inputValue={inputValue}
                         handleInput={handleInput}
                         handleSelection={handleSelection}
-                       
                     />
                 </Grid>
             </Grid>
