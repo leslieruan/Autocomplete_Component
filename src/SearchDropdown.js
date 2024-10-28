@@ -197,6 +197,52 @@ export default function SearchDropdown() {
             setSearchHistory(updatedHistory);
         }
 
+        //  find compelet music data for the history 
+        if (value.fromHistory) {
+            switch (value.type) {
+                case 'name':
+                case 'artist':
+                    const artistData = musicData.find(artist => artist.name === value.name);
+                    setSelection({
+                        type: 'artist',
+                        data: artistData
+                    });
+                    break;
+                case 'album':
+                    //album
+                    for (const artist of musicData) {
+                        const albumData = artist.albums.find(album => album.title === value.name);
+                        if (albumData) {
+                            setSelection({
+                                type: 'album',
+                                data: albumData,
+                                artistName: artist.name
+                            });
+                            break;
+                        }
+                    }
+                    break;
+                case 'song':
+                    // song
+                    for (const artist of musicData) {
+                        for (const album of artist.albums) {
+                            const songData = album.songs.find(song => song.title === value.name);
+                            if (songData) {
+                                setSelection({
+                                    type: 'song',
+                                    data: songData,
+                                    albumName: album.title,
+                                    artistName: artist.name
+                                });
+                                break;
+                            }
+                        }
+                    }
+                    break;
+            }
+            return;
+        }
+
         switch (value.type) {
             case 'artist':
                 const artistData = musicData.find(artist => artist.name === value.name);
