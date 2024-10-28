@@ -41,11 +41,10 @@ export default function SearchDropdown() {
 
 
 
-    const handleSearchTypeChange = async (event) => {
-        const newType = event.target.value;
+    const handleSearchTypeChange = (e) => {
+        const newType = e.target.value;
         setSearchType(newType);
-        const filteredHistory = loadSearchHistory(newType).filter(entry => entry.type === newType);
-        setOptions(filteredHistory);
+        setOptions(loadSearchHistory(newType));
         setSelection(null);
         setInputValue('');
     }
@@ -65,10 +64,11 @@ export default function SearchDropdown() {
         let searchResults = [];
 
         // helper function to match search history
-        const historyMatches = searchHistory
+        const currentHistory = loadSearchHistory(searchType);
+        const historyMatches = currentHistory
             .filter(entry => entry.name.toLowerCase().includes(searchTxt))
             .map(entry => ({
-                type: entry.type,
+                type: searchType,
                 name: entry.name,
                 display: entry.display,
                 fromHistory: true
@@ -164,7 +164,7 @@ export default function SearchDropdown() {
         });
 
         // update the results
-        let combinedResults = [...searchHistory, ...searchResults];
+        let combinedResults =[...currentHistory, ...searchResults];
         const uniqueResults = Array.from(new Map(combinedResults.map(item => [item.name, item])).values());
 
         // sort the search result  basic > word >unorder
