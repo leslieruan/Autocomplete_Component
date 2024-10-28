@@ -18,7 +18,7 @@ export default function SearchDropdown() {
     const [inputValue, setInputValue] = React.useState('');
     const [searchHistory, setSearchHistory] = React.useState([]);
 
-
+    // function to fetch the data and load the searched history data
     React.useEffect(() => {
         // load search history
         setSearchHistory(loadSearchHistory(searchType));
@@ -40,7 +40,7 @@ export default function SearchDropdown() {
     }, []);
 
 
-
+    // function to hande the Search Type Change
     const handleSearchTypeChange = (e) => {
         const newType = e.target.value;
         setSearchType(newType);
@@ -76,20 +76,34 @@ export default function SearchDropdown() {
 
         searchResults.push(...historyMatches);
 
-        // Helper function to match artist
-        const matchArtist = (artist, searchWords, searchTxt) => {
-            const artistWords = artist.name.toLowerCase().split(' ');
-            const basicMatch = artist.name.toLowerCase().includes(searchTxt);
-            const wordMatch = searchWords.every(w => artist.name.toLowerCase().includes(w));
+        // helper function to match artists, albums, and songs
+        const matchFunc = (target, artistName, searchWords, searchTxt, type,albumName = null) => {
+            if (!target || typeof target !== 'object') {
+                console.warn(`Invalid target: ${target}`);
+                return null;
+            }
+
+            const targetText = type === 'artist' ? target.name : target.title;
+
+            if (!targetText) {
+                console.warn(`Invalid type, target: ${type}: ${target}`);
+                return null;
+            }
+
+            const words = targetText.toLowerCase().split(' ');
+            const basicMatch = targetText.toLowerCase().includes(searchTxt);
+            const wordMatch = searchWords.every(w => targetText.toLowerCase().includes(w));
             const unorderedMatch = searchWords.every(searchWord =>
-                artistWords.some(artistWord => artistWord.includes(searchWord))
+                words.some(word => word.includes(searchWord))
             );
 
             if (basicMatch || wordMatch || unorderedMatch) {
                 return {
-                    type: 'artist',
-                    name: artist.name,
-                    display: artist.name,
+                    type: type,
+                    artistName: type !== 'artist' ? artistName : undefined,
+                    name: targetText,
+                    albumName: type === 'song' ? albumName : undefined, 
+                    display: type === 'artist' ? target.name : `${target.title} - ${artistName}`,
                     basicMatch,
                     wordMatch,
                     unorderedMatch
@@ -97,66 +111,20 @@ export default function SearchDropdown() {
             }
             return null;
         };
-
-        // Helper function to match song
-        const matchSong = (song, artistName, albumTitle, searchWords, searchTxt) => {
-            const songWords = song.title.toLowerCase().split(' ');
-            const songbasicMatch = song.title.toLowerCase().includes(searchTxt);
-            const songWordMatch = searchWords.every(w => song.title.toLowerCase().includes(w));
-            const unorderedSongMatch = searchWords.every(searchWord =>
-                songWords.some(songWord => songWord.includes(searchWord))
-            );
-
-            if (songbasicMatch || songWordMatch || unorderedSongMatch) {
-                return {
-                    type: 'song',
-                    name: song.title,
-                    artistName,
-                    albumName: albumTitle,
-                    display: `${song.title} - ${artistName}`,
-                    basicMatch: songbasicMatch,
-                    wordMatch: songWordMatch,
-                    unorderedMatch: unorderedSongMatch
-                };
-            }
-            return null;
-        };
-        // Helper function to match album
-        const matchAlbum = (album, artistName, searchWords, searchTxt) => {
-            const albumWords = album.title.toLowerCase().split(' ');
-            const albumbasicMatch = album.title.toLowerCase().includes(searchTxt);
-            const albumWordMatch = searchWords.every(w => album.title.toLowerCase().includes(w));
-            const unorderedAlbumMatch = searchWords.every(searchWord =>
-                albumWords.some(albumWord => albumWord.includes(searchWord))
-            );
-
-            if (albumbasicMatch || albumWordMatch || unorderedAlbumMatch) {
-                return {
-                    type: 'album',
-                    artistName,
-                    name: album.title,
-                    display: `${album.title} - ${artistName}`,
-                    basicMatch: albumbasicMatch,
-                    wordMatch: albumWordMatch,
-                    unorderedMatch: unorderedAlbumMatch
-                };
-            }
-            return null;
-        };
-
+        //  match search 
         musicData.forEach(artist => {
             if (searchType === 'name') {
-                const artistMatch = matchArtist(artist, searchWords, searchTxt);
+                const artistMatch = matchFunc(artist, null, searchWords, searchTxt, 'artist');
                 if (artistMatch) searchResults.push(artistMatch);
             } else if (searchType === 'album') {
                 artist.albums.forEach(album => {
-                    const albumMatch = matchAlbum(album, artist.name, searchWords, searchTxt);
+                    const albumMatch = matchFunc(album, artist.name, searchWords, searchTxt, 'album');
                     if (albumMatch) searchResults.push(albumMatch);
                 });
             } else if (searchType === 'song') {
                 artist.albums.forEach(album => {
                     album.songs.forEach(song => {
-                        const songMatch = matchSong(song, artist.name, album.title, searchWords, searchTxt);
+                        const songMatch = matchFunc(song, artist.name, searchWords, searchTxt, 'song',album.title);
                         if (songMatch) searchResults.push(songMatch);
                     });
                 });
@@ -164,7 +132,7 @@ export default function SearchDropdown() {
         });
 
         // update the results
-        let combinedResults =[...currentHistory, ...searchResults];
+        let combinedResults = [...currentHistory, ...searchResults];
         const uniqueResults = Array.from(new Map(combinedResults.map(item => [item.name, item])).values());
 
         // sort the search result  basic > word >unorder
@@ -185,97 +153,100 @@ export default function SearchDropdown() {
     };
 
     // function to find the select data
-    const handleSelection = (e, value) => {
-        if (!value) {
-            setSelection(null);
-            setOptions(loadSearchHistory(searchType));
-            console.log(options);
-            return;
-        }
-        if (!value.fromHistory) {
-            const updatedHistory = saveSearchHistory(searchType, value.name, value.name, true);
-            setSearchHistory(updatedHistory);
-        }
+const handleSelection = (e, value) => {
+    if (!value) {
+        setSelection(null);
+        setOptions(loadSearchHistory(searchType));
+        return;
+    }
 
-        //  find compelet music data for the history 
-        if (value.fromHistory) {
-            switch (value.type) {
-                case 'name':
+    // Save to history if it's a new search
+    if (!value.fromHistory) {
+        const updatedHistory = saveSearchHistory(searchType, value.name, value.name, true);
+        setSearchHistory(updatedHistory);
+    }
+
+    // Helper function to find music data from full dataset
+    const findMusicData = (searchValue) => {
+        const { type, name, artistName, albumName } = searchValue;
+        
+        // For history items, we only have the name and type
+        if (searchValue.fromHistory) {
+            switch (type) {
                 case 'artist':
-                    const artistData = musicData.find(artist => artist.name === value.name);
-                    setSelection({
-                        type: 'artist',
-                        data: artistData
-                    });
-                    break;
+                case 'name':
+                    const artist = musicData.find(a => a.name === name);
+                    return { type: 'artist', data: artist };
+
                 case 'album':
-                    //album
                     for (const artist of musicData) {
-                        const albumData = artist.albums.find(album => album.title === value.name);
-                        if (albumData) {
-                            setSelection({
-                                type: 'album',
-                                data: albumData,
-                                artistName: artist.name
-                            });
-                            break;
+                        const album = artist.albums.find(a => a.title === name);
+                        if (album) {
+                            return { 
+                                type: 'album', 
+                                data: album, 
+                                artistName: artist.name 
+                            };
                         }
                     }
                     break;
+
                 case 'song':
-                    // song
                     for (const artist of musicData) {
                         for (const album of artist.albums) {
-                            const songData = album.songs.find(song => song.title === value.name);
-                            if (songData) {
-                                setSelection({
-                                    type: 'song',
-                                    data: songData,
+                            const song = album.songs.find(s => s.title === name);
+                            if (song) {
+                                return { 
+                                    type: 'song', 
+                                    data: song, 
                                     albumName: album.title,
-                                    artistName: artist.name
-                                });
-                                break;
+                                    artistName: artist.name 
+                                };
                             }
                         }
                     }
                     break;
             }
-            return;
+            return null;
         }
 
-        switch (value.type) {
+        // For direct selection, we have all the necessary information
+        switch (type) {
             case 'artist':
-                const artistData = musicData.find(artist => artist.name === value.name);
-                setSelection({
-                    type: 'artist',
-                    data: artistData
-                });
-                break;
-            case 'album':
-                const artistWithAlbum = musicData.find(artist => artist.name === value.artistName);
-                const albumData = artistWithAlbum.albums.find(album => album.title === value.name);
-                setSelection({
-                    type: 'album',
-                    data: albumData,
-                    artistName: value.artistName
-                });
-                break;
-            case 'song':
-                const artistWithsong = musicData.find(artist => artist.name === value.artistName);
-                const albumWithsong = artistWithsong.albums.find(album => album.title === value.albumName);
-                const songData = albumWithsong.songs.find(song => song.title === value.name);
-                setSelection({
-                    type: 'song',
-                    data: songData,
-                    albumName: value.albumName,
-                    artistName: value.artistName
-                });
-                break;
-            default:
-                break;
+                const artist = musicData.find(a => a.name === name);
+                return { type, data: artist };
+
+            case 'album': {
+                const artist = musicData.find(a => a.name === artistName);
+                const album = artist?.albums.find(a => a.title === name);
+                return album ? { 
+                    type, 
+                    data: album, 
+                    artistName: artist.name 
+                } : null;
+            }
+
+            case 'song': {
+                const artist = musicData.find(a => a.name === artistName);
+                const album = artist?.albums.find(a => a.title === albumName);
+                const song = album?.songs.find(s => s.title === name);
+                return song ? { 
+                    type, 
+                    data: song, 
+                    artistName: artist.name ,
+                    albumName: album.title,
+                    songName: song.title 
+                } : null;
+            }
         }
     };
 
+    // Set selection based on found data
+    const result = findMusicData(value);
+    if (result) {
+        setSelection(result);
+    }
+};
     return (
         <div className="searchDropdown">
             <Grid className="search-container" container>
