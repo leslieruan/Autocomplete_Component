@@ -25,7 +25,7 @@ The component features a responsive UI with grid-based search result displays, c
     - [Prerequisites](#prerequisites)
     - [Usage](#usage)
     - [API Endpoints](#api-endpoints)
-    - [Access the App:](#access-the-app)
+    - [Access the App](#access-the-app)
     - [Troubleshooting](#troubleshooting)
 
 
@@ -91,8 +91,8 @@ The component features a responsive UI with grid-based search result displays, c
 
 ## Tech Stack
 
-- **Frontend**: React, Material-UI (MUI) for component styling, Axios for API requests.
-- **Backend**: Node.js, Express for server and routing, Mongoose for MongoDB interaction.
+- **Frontend**: React, Material-UI (MUI) for component styling.
+- **Backend**: Node.js, Express for server and routing.
 - **Database**: MongoDB Atlas for cloud-hosted database storage.
 - **Containerization**: Docker and Docker Compose for running the frontend and backend in isolated containers.
 
@@ -100,47 +100,48 @@ The component features a responsive UI with grid-based search result displays, c
 
 ### Prerequisites
 
-- Node.js (>=14.x)
+- Node.js (>=20.x)
 - Docker and Docker Compose
-- MongoDB Atlas account (or local MongoDB setup)
+- MongoDB Atlas account 
 
-0. Clone the Repository
+1. Clone the Repository
 
 ```bash
 git clone https://github.com/leslieruan/Autocomplete_Component.git
-cd AUTOCOMPLETE_COMPONENTS
+cd autocomplete_components
 ```
 
-1. Install dependencies for both frontend and backend:
+2. Install dependencies for both frontend and backend:
 ```bash
 npm install
 cd server
 npm install
 ```
-2. Set up environment variables:
+3. Set up environment variables:
 Create a `.env` file in the server directory with the following:
 ```
 MONGODB_URI=your_mongodb_connection_string
 PORT=5000
 ```
-3. Start the development servers:
-For backend:
+4. Start the development servers:
+   For backend:
 ```bash
 cd server
 node server.js
 ```
-For frontend:
+  For frontend:
 ```bash
 # In another terminal
 cd autocomplete_components
 npm start
 ```
-4. Docker Setup (Optional)
+5. Docker Setup (Optional)
 To run the application using Docker:
 ```bash
+# It may take some time
 docker-compose up --build
 ```
-The frontend should be available at http://localhost:3001.
+It should be available at http://localhost:3001.
 
 ###  Usage
 1. Select the search type (Artist, Album, or Song) from the dropdown to filter suggestions.
@@ -151,8 +152,8 @@ The frontend should be available at http://localhost:3001.
 ### API Endpoints
 
 - `GET /api/artists` - Get music data
-- 
-### Access the App:
+  
+### Access the App
 
 Frontend: http://localhost:3001
 Backend API: http://localhost:5001/api/artists
