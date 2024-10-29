@@ -23,9 +23,9 @@ The component features a responsive UI with grid-based search result displays, c
   - [Tech Stack](#tech-stack)
   - [Setup Instructions](#setup-instructions)
     - [Prerequisites](#prerequisites)
-    - [1. Clone the Repository](#1-clone-the-repository)
     - [Usage](#usage)
     - [API Endpoints](#api-endpoints)
+    - [Access the App:](#access-the-app)
     - [Troubleshooting](#troubleshooting)
 
 
@@ -104,7 +104,7 @@ The component features a responsive UI with grid-based search result displays, c
 - Docker and Docker Compose
 - MongoDB Atlas account (or local MongoDB setup)
 
-### 1. Clone the Repository
+0. Clone the Repository
 
 ```bash
 git clone https://github.com/leslieruan/Autocomplete_Component.git
@@ -140,7 +140,7 @@ To run the application using Docker:
 ```bash
 docker-compose up --build
 ```
-The frontend should be available at http://localhost:3001 and backend at http://localhost:5001.
+The frontend should be available at http://localhost:3001.
 
 ###  Usage
 1. Select the search type (Artist, Album, or Song) from the dropdown to filter suggestions.
@@ -151,6 +151,11 @@ The frontend should be available at http://localhost:3001 and backend at http://
 ### API Endpoints
 
 - `GET /api/artists` - Get music data
+- 
+### Access the App:
+
+Frontend: http://localhost:3001
+Backend API: http://localhost:5001/api/artists
 
 ###  Troubleshooting
 CORS Issues: If you encounter CORS errors, ensure cors is enabled in the backend server.js.
