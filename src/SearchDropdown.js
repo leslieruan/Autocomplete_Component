@@ -19,6 +19,7 @@ export default function SearchDropdown() {
     // eslint-disable-next-line no-unused-vars
     const [searchHistory, setSearchHistory] = React.useState([]);
 
+
     // function to fetch the data and load the searched history data
     React.useEffect(() => {
         // load search history
