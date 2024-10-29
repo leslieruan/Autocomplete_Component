@@ -9,18 +9,26 @@ import AlbumInfo from './AlbumInfo';
 import SongInfo from './SongInfo';
 import { loadSearchHistory, saveSearchHistory } from './SearchHistory'
 
-
+/**
+ * Main search dropdown component that manages music search functionality
+ * Supports searching by artist name, album, and song
+ * Includes search history and dynamic results filtering
+ */
 export default function SearchDropdown() {
     const [musicData, setMusicData] = React.useState([]);
     const [options, setOptions] = React.useState(loadSearchHistory('name'));
     const [selection, setSelection] = React.useState(null);
     const [searchType, setSearchType] = React.useState('name');
     const [inputValue, setInputValue] = React.useState('');
+    // Search history state is maintained but not directly used
     // eslint-disable-next-line no-unused-vars
     const [searchHistory, setSearchHistory] = React.useState([]);
 
 
-    // function to fetch the data and load the searched history data
+    /**
+      * Effect hook to fetch data and load search history
+      * Triggers when search type changes
+      */
     React.useEffect(() => {
         // load search history
         setSearchHistory(loadSearchHistory(searchType));
@@ -42,7 +50,10 @@ export default function SearchDropdown() {
     }, [searchType]);
 
 
-    // function to hande the Search Type Change
+    /**
+     * Handles changes in search type (artist, album, song)
+     * Resets selection and input values
+     */
     const handleSearchTypeChange = (e) => {
         const newType = e.target.value;
         setSearchType(newType);
@@ -51,21 +62,19 @@ export default function SearchDropdown() {
         setInputValue('');
     }
 
-
-    // function to handle the input changes
+    /**
+      * Handles input changes in search field
+      * Filters results based on search text and current search type
+      */
     const handleInput = (e, value) => {
         setInputValue(value);
         if (!value) {
             setOptions(options);
             return;
         }
-
         const searchTxt = value.toLowerCase();
-        // only filter the empty strings 
         const searchWords = searchTxt.split(' ').filter(word => word !== ' ');
         let searchResults = [];
-
-        // helper function to match search history
         const currentHistory = loadSearchHistory(searchType);
         const historyMatches = currentHistory
             .filter(entry => entry.name.toLowerCase().includes(searchTxt))
@@ -75,30 +84,28 @@ export default function SearchDropdown() {
                 display: entry.display,
                 fromHistory: true
             }));
-
         searchResults.push(...historyMatches);
 
-        // helper function to match artists, albums, and songs
+        /**
+         * Helper function to match search terms against target items
+         * Supports matching artists, albums, and songs
+         */
         const matchFunc = (target, artistName, searchWords, searchTxt, type, albumName = null) => {
             if (!target || typeof target !== 'object') {
                 console.warn(`Invalid target: ${target}`);
                 return null;
             }
-
             const targetText = type === 'artist' ? target.name : target.title;
-
             if (!targetText) {
                 console.warn(`Invalid type, target: ${type}: ${target}`);
                 return null;
             }
-
             const words = targetText.toLowerCase().split(' ');
             const basicMatch = targetText.toLowerCase().includes(searchTxt);
             const wordMatch = searchWords.every(w => targetText.toLowerCase().includes(w));
             const unorderedMatch = searchWords.every(searchWord =>
                 words.some(word => word.includes(searchWord))
             );
-
             if (basicMatch || wordMatch || unorderedMatch) {
                 return {
                     type: type,
@@ -113,7 +120,8 @@ export default function SearchDropdown() {
             }
             return null;
         };
-        //  match search 
+
+        // Perform search based on current search type
         musicData.forEach(artist => {
             if (searchType === 'name') {
                 const artistMatch = matchFunc(artist, null, searchWords, searchTxt, 'artist');
@@ -132,12 +140,10 @@ export default function SearchDropdown() {
                 });
             }
         });
-
-        // update the results
         let combinedResults = [...currentHistory, ...searchResults];
         const uniqueResults = Array.from(new Map(combinedResults.map(item => [item.name, item])).values());
 
-        // sort the search result  basic > word >unorder
+        // Sort results by match quality: basic > word > unordered
         uniqueResults.sort((a, b) => {
             if (a.basicMacth !== b.basicMacth) {
                 return a.basicMatch ? -1 : 1;
@@ -154,27 +160,31 @@ export default function SearchDropdown() {
         setOptions(uniqueResults);
     };
 
-    // function to find the selection data
+    /**
+     * Handles selection of a search result
+     * Updates search history and finds detailed information for selected item
+     */
     const handleSelection = (e, value) => {
         if (!value) {
             setSelection(null);
             setOptions(loadSearchHistory(searchType));
             return;
         }
-
-        // Save to history if it's a new search
+        // Save new searches to history
         if (!value.fromHistory) {
             const updatedHistory = saveSearchHistory(searchType, value.name, value.name, true);
             setSearchHistory(updatedHistory);
         }
 
-        // Helper function to find music data from full dataset
+        /**
+         * Helper function to find detailed music data from full dataset
+         * Supports finding artists, albums, and songs
+         */
         const findMusicData = (searchValue) => {
             const findArtist = (name) => musicData.find(artist => artist.name === name);
             const findAlbum = (artist, title) => artist?.albums.find(album => album.title === title);
             const findSong = (album, title) => album?.songs.find(song => song.title === title);
             const { type, name, artistName, albumName, fromHistory } = searchValue;
-
             // Handle history items
             if (fromHistory) {
                 switch (type) {
@@ -207,10 +217,8 @@ export default function SearchDropdown() {
                 }
                 return null;
             }
-
             // Handle direct type selection
             const artist = findArtist(artistName || name);
-
             switch (type) {
                 case 'artist':
                     return artist ? { type, data: artist } : null;
@@ -230,14 +238,11 @@ export default function SearchDropdown() {
                     return null;
             }
         };
-
-        // Set selection based on found data
         const result = findMusicData(value);
         if (result) {
             setSelection(result);
         }
     };
-
 
     return (
         <div className="searchDropdown">

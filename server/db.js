@@ -1,4 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
+// Load environment variables from a .env file
 require('dotenv').config();
 
 const uri = process.env.MONGODB_URI
@@ -11,7 +12,14 @@ const client = new MongoClient(uri, {
     tls: true
   }
 });
-
+/**
+ * Connects to the MongoDB database and returns the database instance.
+ *
+ * @async
+ * @function connectToDatabase
+ * @returns {Promise<Object>} The database instance
+ * @throws {Error} Throws an error if the connection fails
+ */
 async function connectToDatabase() {
   try {
     await client.connect();
@@ -23,5 +31,4 @@ async function connectToDatabase() {
     throw error;
   }
 }
-
 module.exports = { connectToDatabase, client };

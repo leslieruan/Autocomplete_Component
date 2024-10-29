@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
+// Define the API endpoint to get artists
 app.get('/api/artists', async (req, res) => {
   try {
       const db = await connectToDatabase();
@@ -19,7 +19,7 @@ app.get('/api/artists', async (req, res) => {
   }
 });
 
-
+// Set the port for the server to listen on and server start
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
