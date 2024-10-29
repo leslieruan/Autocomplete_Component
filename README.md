@@ -7,7 +7,7 @@ This project is an autocomplete search component designed to help users quickly 
 - **Frontend:** React (with MUI for UI components)
 - **Backend:** Node.js with Express
 - **Database:** MongoDB Atlas
-- **Containerization:** Docker (monorepo setup for frontend and backend in a single repository)
+- **Containerization:** Docker 
 - **Additional Tools:** JSONLint for data correction, CORS for cross-origin support, and JSON processing for data cleaning.
 
 The component features a responsive UI with grid-based search result displays, clickable cards for detailed information, and a search history function for user convenience.
@@ -57,6 +57,7 @@ The component features a responsive UI with grid-based search result displays, c
    - Communication within the Docker network uses container names, while external requests from the host machine utilize `localhost`.
 
 ## Project Structure
+Use monorepo setup for frontend and backend in a single repository
 
 ### Directory and File Explanations
 
@@ -135,13 +136,15 @@ node server.js
 cd autocomplete_components
 npm start
 ```
-5. Docker Setup (Optional)
+Use local machine: The frontend should be available at http://localhost:3000 and backend at http://localhost:5001/api/artists.
+1. Docker Setup (Optional)
 To run the application using Docker:
 ```bash
 # It may take some time
 docker-compose up --build
 ```
-It should be available at http://localhost:3001.
+Use docker : The frontend should be available at http://localhost:3001 and backend at http://localhost:5001/api/artists.
+
 
 ###  Usage
 1. Select the search type (Artist, Album, or Song) from the dropdown to filter suggestions.
@@ -160,6 +163,7 @@ Backend API: http://localhost:5001/api/artists
 
 ###  Troubleshooting
 CORS Issues: If you encounter CORS errors, ensure cors is enabled in the backend server.js.
+
 Invalid JSON Data: Make sure your JSON data is valid before importing. Use jsonlint to validate and fix any issues.
 
 
